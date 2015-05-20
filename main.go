@@ -3,9 +3,9 @@ package main // import "github.com/cloudspace/Go_Location_Address"
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 
 	_ "github.com/lib/pq"
@@ -34,6 +34,14 @@ func main() {
 		return
 	}
 
+	cmd := exec.Command("sh", "-c", "service postgresql start")
+	err = cmd.Run()
+
+	if err != nil {
+		fmt.Println(getJSONError(err))
+		return
+	}
+
 	connectionURI := "host=127.0.0.1 port=5432 user=docker password=docker dbname=postgres"
 	//fmt.Println("Connecting")
 	db, err := sql.Open("postgres", connectionURI)
@@ -50,13 +58,27 @@ func main() {
 		return
 	}
 
+	if len(result) == 0 {
+		err = fmt.Errorf("No results from query: %s", query)
+		fmt.Println(getJSONError(err))
+		return
+	}
+
 	geomLocation := result[0]["the_geom"]
-	fmt.Println(fmt.Sprintf("Got location: %s", geomLocation))
+	//fmt.Println(fmt.Sprintf("Got location: %s", geomLocation))
 
 	query = fmt.Sprintf("SELECT * from tiger_data.ALL_addrfeat WHERE ST_DWithin(the_geom, E'%s', 0.2) ORDER BY ST_Distance(the_geom, E'%s') limit 1;", geomLocation, geomLocation)
 	result, err = queryPostgres(query, db)
 	if err != nil {
 		fmt.Println(getJSONError(err))
+		return
+	}
+
+	if len(result) == 0 {
+		jsonResponse := make(map[string]interface{}, 0)
+		jsonResponse["address"] = ""
+		jsonResponse["error"] = ""
+		fmt.Println(asJSON(jsonResponse))
 		return
 	}
 
@@ -76,7 +98,14 @@ func main() {
 	if hasBothHouseNumbers {
 		query = fmt.Sprintf("SELECT E'%s' &< st_closestpoint(E'%s', E'%s') as houseIsOnLeft", geomLocation, geomAddress, geomLocation)
 		result, err = queryPostgres(query, db)
+
 		if err != nil {
+			fmt.Println(getJSONError(err))
+			return
+		}
+
+		if len(result) == 0 {
+			err = fmt.Errorf("No results from query: %s", query)
 			fmt.Println(getJSONError(err))
 			return
 		}
@@ -98,6 +127,8 @@ func main() {
 	}
 
 	jsonResponse := make(map[string]interface{}, 0)
+	jsonResponse["address"] = ""
+	jsonResponse["error"] = ""
 
 	if skipAddressNum {
 		jsonResponse["address"] = fullName
@@ -109,17 +140,16 @@ func main() {
 			return
 		}
 
-		streetNumber := result[0]["street_num"]
-		jsonResponse["address"] = fmt.Sprintf("%d %s", streetNumber, fullName)
+		if len(result) > 0 {
+			streetNumber := result[0]["street_num"]
+			jsonResponse["address"] = fmt.Sprintf("%d %s", streetNumber, fullName)
+		}
 	}
-
-	jsonResponse["error"] = ""
 
 	fmt.Println(asJSON(jsonResponse))
 }
 
 func queryPostgres(sqlString string, db *sql.DB) ([]map[string]interface{}, error) {
-	fmt.Println(fmt.Sprintf("Query: %s", sqlString))
 	rows, err := db.Query(sqlString)
 	if err != nil {
 		return nil, err
@@ -151,11 +181,6 @@ func queryPostgres(sqlString string, db *sql.DB) ([]map[string]interface{}, erro
 			entry[col] = v
 		}
 		tableData = append(tableData, entry)
-	}
-	length := len(tableData)
-	fmt.Println(fmt.Sprintf("Result Length: %d", length))
-	if len(tableData) == 0 {
-		return nil, errors.New("No table data")
 	}
 	return tableData, nil
 }

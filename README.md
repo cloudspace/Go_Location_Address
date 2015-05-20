@@ -1,5 +1,5 @@
-# Go Location City
-A Go Microservice to return the nearest city for latitude and longitude.
+# Go Location Address
+A Go Microservice to return the nearest address for latitude and longitude.
 
 #### Usage
 Input must have 2 arguments:
