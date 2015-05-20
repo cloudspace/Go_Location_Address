@@ -1,0 +1,34 @@
+microservice:
+  spec_version: '2.0'
+  name: 'Go_Location_Address'
+  description: 'A Go Microservice to return the nearest address for latitude and longitude.'
+  docker_image: 'izackp/go_location_address'
+  docker_image_tag: '0.1'
+  repo_url: 'https://github.com/cloudspace/Go_Location_Address'
+  docker_hub_url: 'https://registry.hub.docker.com/u/izackp/go_location_address/'
+  category: 'URL'
+  tags: ['geolocation', 'Address', 'street', 'go', 'golang']
+  developer_name: 'isaac'
+  developer_type: 'User'
+  published: true
+  command: '/Go_Location_Address [lat] [long]'
+  inputs:
+    lat:
+      param_type: 'Number'
+      regex: '^[0-9.-]+$'
+      required: true
+      secure: false
+      description: 'Latitude'
+    long:
+      param_type: 'Number'
+      regex: '^[0-9.-]+$'
+      required: true
+      secure: false
+      description: 'Longitude'
+  outputs:
+    address:
+      param_type: 'String'
+      description: 'Address returned for specified latitude and longitude.'
+    error:
+      param_type: 'String'
+      description: 'Error Message'
