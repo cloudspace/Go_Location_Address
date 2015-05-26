@@ -67,7 +67,7 @@ func main() {
 	geomLocation := result[0]["the_geom"]
 	//fmt.Println(fmt.Sprintf("Got location: %s", geomLocation))
 
-	query = fmt.Sprintf("SELECT * from tiger_data.ALL_addrfeat WHERE ST_DWithin(the_geom, E'%s', 0.2) ORDER BY ST_Distance(the_geom, E'%s') limit 1;", geomLocation, geomLocation)
+	query = fmt.Sprintf("SELECT * from tiger_data._addrfeat WHERE ST_DWithin(the_geom, E'%s', 0.2) ORDER BY ST_Distance(the_geom, E'%s') limit 1;", geomLocation, geomLocation)
 	result, err = queryPostgres(query, db)
 	if err != nil {
 		fmt.Println(getJSONError(err))

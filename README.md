@@ -11,11 +11,11 @@ Input must have 2 arguments:
 -
 Input:
 ```
-go run main.go 40.774576 -73.952545
+go run main.go 33.1056113 -86.8459558
 ```
 Output (Success):
 ```
-{"error":"","address":"Orlando"}
+{"error":"","address":"514 Hidden Valley Dr"}
 ```
 -
 Output (Failure):
@@ -26,7 +26,7 @@ Output (Failure):
 }
 ```
 
-#### How to build docker image
+#### How to build a linux binary from osx
 Requirements:
 
 1. Golang environment set up
@@ -37,7 +37,6 @@ Requirements:
 go get github.com/cloudspace/Go_Location_Address
 cd <Go_Location_Address Directory>
 docker run --rm -v $(pwd):/src centurylink/golang-builder
-docker build -t <username>/go_location_address:0.1 ./
 
 ```
 
@@ -45,4 +44,6 @@ In order for the golang-builder to work, you need to have the github url on the 
 ```
 package main // import "github.com/cloudspace/Go_Location_Address"
 ```
-You also must *push your code* to github *before building* the docker image.
+
+#### How to build a docker image
+A docker image has to be built for each state. Follow the instructions here: [Generate Docker Images - Instructions](GenerateDockerImages/Instructions.md)

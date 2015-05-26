@@ -1,0 +1,18 @@
+FROM izackp/postgres_setup:0.2
+MAINTAINER Isaac Paul<isaac@cloudspace.com>
+
+#-------------Application Specific Stuff ----------------------------------------------------
+
+RUN apt-get install -y wget
+RUN apt-get install -y unzip
+
+EXPOSE 5432
+
+ADD ./Go_Location_Address /Go_Location_Address
+ADD ./microservice.yml /microservice.yml
+ADD loadStateInfo.sh /loadStateInfo.sh
+RUN chmod 0755 /loadStateInfo.sh
+
+RUN /loadStateInfo.sh __STATE_ID__ tl_*___STATE_ID__* __FTP_DIRECTORY__
+
+CMD ["service postgresql start"]
