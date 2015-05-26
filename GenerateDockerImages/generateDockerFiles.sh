@@ -48,5 +48,6 @@ do
   docker build -t izackp/go_location_address_${stateLowerCase}:0.2 ./
 
   docker push izackp/go_location_address_${stateLowerCase}:0.2
+  cd ..
 
 done
